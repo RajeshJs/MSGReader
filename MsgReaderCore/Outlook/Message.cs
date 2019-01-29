@@ -1122,6 +1122,21 @@ namespace MsgReader.Outlook
                     if (_bodyHtml != null)
                         return _bodyHtml;
 
+                    GetPropKeys(MapiTags.PR_BODY_HTML, out var propTag, out _);
+
+                    // When null then we didn't find the property
+                    if (propTag == null)
+                        return null;
+
+                    // Depending on prop type use method to get property value
+                    var containerName = MapiTags.SubStgVersion1 + "_" + propTag;
+                    var htmlBytes = GetStreamBytes(containerName);
+
+                    if (htmlBytes != null && htmlBytes.Length > 0)
+                    {
+                        return InternetCodePage.GetString(htmlBytes);
+                    }
+
                     // Get value for the HTML MAPI property
                     var htmlObject = GetMapiProperty(MapiTags.PR_BODY_HTML);
                     string html = null;

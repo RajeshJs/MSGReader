@@ -268,21 +268,7 @@ namespace MsgReader.Outlook
         private object GetMapiPropertyFromStreamOrStorage(string propIdentifier)
         {
             // Get list of stream and storage identifiers which map to properties
-            var propKeys = new List<string>();
-            propKeys.AddRange(_streamStatistics.Keys);
-            propKeys.AddRange(_subStorageStatistics.Keys);
-
-            // Determine if the property identifier is in a stream or sub storage
-            string propTag = null;
-            var propType = PropertyType.PT_UNSPECIFIED;
-
-            foreach (var propKey in propKeys)
-            {
-                if (!propKey.StartsWith(MapiTags.SubStgVersion1 + "_" + propIdentifier)) continue;
-                propTag = propKey.Substring(12, 8);
-                propType = (PropertyType) ushort.Parse(propKey.Substring(16, 4), NumberStyles.HexNumber);
-                break;
-            }
+            var propKeys = GetPropKeys(propIdentifier, out var propTag, out var propType);
 
             // When null then we didn't find the property
             if (propTag == null)
@@ -332,6 +318,27 @@ namespace MsgReader.Outlook
                 default:
                     throw new ApplicationException("MAPI property has an unsupported type and can not be retrieved.");
             }
+        }
+
+        private List<string> GetPropKeys(string propIdentifier, out string propTag, out PropertyType propType)
+        {
+            var propKeys = new List<string>();
+            propKeys.AddRange(_streamStatistics.Keys);
+            propKeys.AddRange(_subStorageStatistics.Keys);
+
+            // Determine if the property identifier is in a stream or sub storage
+            propTag = null;
+            propType = PropertyType.PT_UNSPECIFIED;
+
+            foreach (var propKey in propKeys)
+            {
+                if (!propKey.StartsWith(MapiTags.SubStgVersion1 + "_" + propIdentifier)) continue;
+                propTag = propKey.Substring(12, 8);
+                propType = (PropertyType) ushort.Parse(propKey.Substring(16, 4), NumberStyles.HexNumber);
+                break;
+            }
+
+            return propKeys;
         }
 
         /// <summary>

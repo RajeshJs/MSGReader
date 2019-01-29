@@ -2137,7 +2137,7 @@ namespace MsgReader
         {
             attachments = new List<string>();
             files = new List<string>();
-
+            
             var bodyMessagePart = message.HtmlBody;
 
             if (bodyMessagePart != null)
